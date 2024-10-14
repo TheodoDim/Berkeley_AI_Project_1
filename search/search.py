@@ -90,25 +90,23 @@ def depthFirstSearch(problem: SearchProblem) -> List[Directions]:
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
+    frontier = util.Stack()
+    frontier.push( (problem.getStartState() , []) )
 
-    node = problem.getStartState()
-    if problem.isGoalState(node):
-        return [Directions.STOP]
-    
-    fringe = util.Stack()
-    fringe.push((node , []))
+
     explored_set = set()
+    while not frontier.isEmpty():
+        node = frontier.pop()
+        if problem.isGoalState(node[0]):
+            return node[1]
+        if not (node[0] in explored_set):
+            explored_set.add(node[0])
+            for child in problem.getSuccessors(node[0]):
+                frontier.push((child[0] , (node[1] + [child[1]])))
+    return None
 
 
-    while not fringe.isEmpty():
-        node = fringe.pop()
-        explored_set.add(node[0])
-        for succesor in problem.getSuccessors(node[0]):
-            child = succesor[0]
-            if not ( child in explored_set):
-                if problem.isGoalState(child):
-                    return node[1] + [succesor[1]]
-                fringe.push((child, node[1] + [succesor[1]]))
+    
                 
     util.raiseNotDefined()
 
