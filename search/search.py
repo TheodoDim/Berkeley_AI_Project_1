@@ -170,14 +170,24 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic) -> List[Directi
         node = frontier.pop()
         if problem.isGoalState( node[0] ):
             return node[1]
-        if not ( node[0] in explored_set):
-            explored_set.add(node[0])
+        result = visited_check(explored_set , node[0])
+        if result == False:
+            explored_set.add( (node[0] , node[2]) )
             for succesor in problem.getSuccessors(node[0]):
                 child = succesor[0]
-                if not ( child in explored_set):
+                result = visited_check(explored_set , child)
+                g_cost = problem.getCostOfActions( (node[1] + [succesor[1]]) )
+                total_cost = g_cost + heuristic( child, problem)
+                if result == False:
                     g_cost = problem.getCostOfActions( (node[1] + [succesor[1]]) )
                     total_cost = g_cost + heuristic( child, problem)
-                    frontier.push( ( child , (node[1] + [succesor[1]]) , g_cost), total_cost )   
+                    frontier.update( ( child , (node[1] + [succesor[1]]) , g_cost), total_cost )  
+                else:
+                    if result[1] > g_cost:
+                        frontier.push( ( child , (node[1] + [succesor[1]]) , g_cost), total_cost )  
+                        explored_set.remove(result)
+
+
                        
     return None 
 
