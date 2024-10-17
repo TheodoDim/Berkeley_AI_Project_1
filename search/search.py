@@ -63,8 +63,11 @@ class SearchProblem:
         """
         util.raiseNotDefined()
 
-
-
+def visited_check( explored_set , goal):
+    for pair in explored_set:
+        if pair[0] == goal:
+            return pair
+    return False
 
 def tinyMazeSearch(problem: SearchProblem) -> List[Directions]:
     """
@@ -139,20 +142,15 @@ def uniformCostSearch(problem: SearchProblem) -> List[Directions]:
         node = frontier.pop()
         if problem.isGoalState( node[0] ):
             return node[1]
-        if not ( node[0] in explored_set):
-            explored_set.add(node[0])
+        if  not (node[0] in explored_set):
+            explored_set.add( node[0]  )
             for succesor in problem.getSuccessors(node[0]):
                 child = succesor[0]
                 if not ( child in explored_set):
-                    frontier.push( ( child , (node[1] + [succesor[1]]) ), problem.getCostOfActions( (node[1] + [succesor[1]]) ) )
-                
+                    frontier.push( ( child , (node[1] + [succesor[1]]) ), problem.getCostOfActions( (node[1] + [succesor[1]]) ) ) 
     return None 
 
-    #any( ( (t[0]== child) and ( problem.getCostOfActions(t[1]) > problem.getCostOfActions( node[1] + succesor[1]))) for t in frontier)
-
-
-
-
+    
     util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None) -> float:
@@ -163,8 +161,26 @@ def nullHeuristic(state, problem=None) -> float:
     return 0
 
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic) -> List[Directions]:
-    """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
+
+    frontier = util.PriorityQueue()
+    frontier.push( ( problem.getStartState() , [] , 0 )  , heuristic(  problem.getStartState() , problem) )
+    explored_set = set()
+
+    while not frontier.isEmpty():
+        node = frontier.pop()
+        if problem.isGoalState( node[0] ):
+            return node[1]
+        if not ( node[0] in explored_set):
+            explored_set.add(node[0])
+            for succesor in problem.getSuccessors(node[0]):
+                child = succesor[0]
+                if not ( child in explored_set):
+                    g_cost = problem.getCostOfActions( (node[1] + [succesor[1]]) )
+                    total_cost = g_cost + heuristic( child, problem)
+                    frontier.push( ( child , (node[1] + [succesor[1]]) , g_cost), total_cost )   
+                       
+    return None 
+
     util.raiseNotDefined()
 
 # Abbreviations
