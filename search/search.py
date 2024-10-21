@@ -117,13 +117,13 @@ def breadthFirstSearch(problem: SearchProblem) -> List[Directions]:
     frontier = util.Queue()
     frontier.push( (problem.getStartState() , []) )
 
-    explored_set = set()
+    explored_set = []
     while not frontier.isEmpty():
         node = frontier.pop()
         if problem.isGoalState(node[0]):
             return node[1]
         if not (node[0] in explored_set):
-            explored_set.add(node[0])
+            explored_set.append(node[0])
             for child in problem.getSuccessors(node[0]):
                 frontier.push((child[0] , (node[1] + [child[1]])))
     return None
@@ -164,7 +164,7 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic) -> List[Directi
 
     frontier = util.PriorityQueue()
     frontier.push( ( problem.getStartState() , [] , 0 )  , heuristic(  problem.getStartState() , problem) )
-    explored_set = set()
+    explored_set = list()
 
     while not frontier.isEmpty():
         node = frontier.pop()
@@ -172,7 +172,7 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic) -> List[Directi
             return node[1]
         result = visited_check(explored_set , node[0])
         if result == False:
-            explored_set.add( (node[0] , node[2]) )
+            explored_set.append( (node[0] , node[2]) )
             for succesor in problem.getSuccessors(node[0]):
                 child = succesor[0]
                 result = visited_check(explored_set , child)
