@@ -297,7 +297,7 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        visited = [False , False , False , False]
+        visited = (False , False , False , False)
         return (self.startingPosition, visited)
         util.raiseNotDefined()
 
@@ -308,7 +308,7 @@ class CornersProblem(search.SearchProblem):
         "*** YOUR CODE HERE ***"
         visited = state[1]
         for corner in visited:
-            if corner == 0:
+            if corner == False:
                 return False
         return True
         
@@ -333,12 +333,14 @@ class CornersProblem(search.SearchProblem):
             nextx, nexty = int(x + dx), int(y + dy)
             if not self.walls[nextx][nexty]:
                 
-                new_visited = visited.copy()
+                new_visited = list(visited)
                 if (nextx, nexty) in self.corners:
                     cornerIndex = self.corners.index((nextx, nexty))
                     new_visited[cornerIndex] = True
                 cost = 1
-                nextState = ( (nextx, nexty), new_visited)
+                new_visited = tuple(new_visited)
+                new_pos = (nextx, nexty)
+                nextState = ( new_pos , new_visited)
                 successors.append((nextState , action , cost ) )
 
             "*** YOUR CODE HERE ***"
@@ -484,8 +486,11 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
 
+    if problem.isGoalState(state):
+        return 0
+
+    return 0
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
