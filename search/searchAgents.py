@@ -490,7 +490,20 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     if problem.isGoalState(state):
         return 0
 
-    return 0
+    from util import manhattanDistance
+    food_list = state[1].asList()
+    min_dist = 99999
+    max_dist = -1
+    for food in food_list:
+        dist = manhattanDistance( food , state[0])
+        if dist < min_dist:
+            min_dist = dist
+            min_dist_node = food
+        if dist > max_dist:
+            max_dist = dist
+            max_dist_node = food
+
+    return   (mazeDistance(state[0], min_dist_node , problem.startingGameState) + mazeDistance(state[0], max_dist_node , problem.startingGameState)) /2
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -521,6 +534,9 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
+        from search import breadthFirstSearch
+
+        return breadthFirstSearch(problem)
         util.raiseNotDefined()
 
 class AnyFoodSearchProblem(PositionSearchProblem):
@@ -557,6 +573,10 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x,y = state
 
         "*** YOUR CODE HERE ***"
+        food_list = self.food.asList()
+        if (x,y) in food_list:
+            return True
+        return False
         util.raiseNotDefined()
 
 def mazeDistance(point1: Tuple[int, int], point2: Tuple[int, int], gameState: pacman.GameState) -> int:
