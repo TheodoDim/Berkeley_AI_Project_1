@@ -491,20 +491,24 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
         return 0
 
     from util import manhattanDistance
+
     food_list = state[1].asList()
-    min_dist = 99999
     max_dist = -1
+    max_real_dist = -1
     for food in food_list:
         dist = manhattanDistance( food , state[0])
-        if dist < min_dist:
-            min_dist = dist
-            min_dist_node = food
         if dist > max_dist:
             max_dist = dist
-            max_dist_node = food
+    
+    for food in food_list:
+        if manhattanDistance( food , state[0]) == max_dist:
+            real_ans = mazeDistance(state[0] , food , problem.startingGameState)
+            if real_ans > max_real_dist:
+                max_real_dist = real_ans
+       
+    
 
-    return   (mazeDistance(state[0], min_dist_node , problem.startingGameState) + mazeDistance(state[0], max_dist_node , problem.startingGameState)) /2
-
+    return   max_real_dist
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
     def registerInitialState(self, state):
