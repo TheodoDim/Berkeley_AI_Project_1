@@ -297,6 +297,11 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
+        # for each state we return a tuple containing the position 
+        # and a tuple of the visited corners
+        # NOTE : we could not use list cause it is unhasable, meaning it cast be added in 
+        # a PQueue cause it's elements can change. A tuple's elements cannot change, hence 
+        # a tuple is appropriate for our application
         visited = (False , False , False , False)
         return (self.startingPosition, visited)
         util.raiseNotDefined()
@@ -306,6 +311,8 @@ class CornersProblem(search.SearchProblem):
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
+        # to determine if a state is a goal state we 
+        # just just if every single corner has been visited
         visited = state[1]
         for corner in visited:
             if corner == False:
@@ -326,17 +333,24 @@ class CornersProblem(search.SearchProblem):
         """
         successors = []
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
+
             pos, visited = state
             x = pos[0]
             y = pos[1]
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
+
             if not self.walls[nextx][nexty]:
                 
+                # as noted above we are using tuples istead of lists to track the 
+                # visited corners, but in order to update the visited corners we turn the tuple 
+                # to a list, edit it and convert it back to a tuple
+
                 new_visited = list(visited)
                 if (nextx, nexty) in self.corners:
                     cornerIndex = self.corners.index((nextx, nexty))
                     new_visited[cornerIndex] = True
+
                 cost = 1
                 new_visited = tuple(new_visited)
                 new_pos = (nextx, nexty)
@@ -394,10 +408,11 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
             dist = dist + (abs(x1- x2)**2 + abs(y1 - y2)**2)**0.5
         counter = counter + 1
         
+    # we just sum the euclidean distance from the pacman position to 
+    # all the yet to be visited nodes of the grid and then divide by 1.5 
+    # in order to keep in admissible
 
     return dist/1.5
-
-
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -425,6 +440,7 @@ class FoodSearchProblem:
         return self.start
 
     def isGoalState(self, state):
+        # we have reached our goal when the count of foods remaining is zero
         return state[1].count() == 0
 
     def getSuccessors(self, state):
@@ -488,25 +504,33 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     "*** YOUR CODE HERE ***"
 
     if problem.isGoalState(state):
+        # in case we are in goal state the heuristic must be 0 in order to be admissible
         return 0
 
     from util import manhattanDistance
 
     food_list = state[1].asList()
+    # we create the list of food coordinates
     max_dist = -1
     max_real_dist = -1
+
+    # we find the max manhattanDistance of a food to the position of pacman
     for food in food_list:
         dist = manhattanDistance( food , state[0])
         if dist > max_dist:
             max_dist = dist
     
+    # now for all the foods that are max_dist away from pacman, we run find the max mazeDistance
+    # and that is our heuristic
+
     for food in food_list:
         if manhattanDistance( food , state[0]) == max_dist:
             real_ans = mazeDistance(state[0] , food , problem.startingGameState)
             if real_ans > max_real_dist:
                 max_real_dist = real_ans
        
-    
+    # note that in most of the cases mazeDistance will only be called a handfull of times
+    # hence making our heuristic function not trivial , admissible and quite close to reality
 
     return   max_real_dist
 class ClosestDotSearchAgent(SearchAgent):
@@ -541,6 +565,7 @@ class ClosestDotSearchAgent(SearchAgent):
         from search import breadthFirstSearch
 
         return breadthFirstSearch(problem)
+        # we just import the bfs and run based on the problem
         util.raiseNotDefined()
 
 class AnyFoodSearchProblem(PositionSearchProblem):
@@ -578,7 +603,9 @@ class AnyFoodSearchProblem(PositionSearchProblem):
 
         "*** YOUR CODE HERE ***"
         food_list = self.food.asList()
-        if (x,y) in food_list:
+        # we get the list containing all the food tuples
+        if (x,y) in food_list: 
+            # if our coordinates are located on a food then we have reached goal state
             return True
         return False
         util.raiseNotDefined()

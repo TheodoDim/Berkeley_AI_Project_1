@@ -63,7 +63,7 @@ class SearchProblem:
         """
         util.raiseNotDefined()
 
-def visited_check( explored_set , goal):
+def visited_check( explored_set , goal ):
     for pair in explored_set:
         if pair[0] == goal:
             return pair
@@ -93,42 +93,60 @@ def depthFirstSearch(problem: SearchProblem) -> List[Directions]:
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
+
     frontier = util.Stack()
     frontier.push( (problem.getStartState() , []) )
-
     explored_set = set()
+
+    # frontier consists of tuples containing a state and a string of directions
+    # this way we can add an extra step in directions by just "adding" a string to another
+
     while not frontier.isEmpty():
+
         node = frontier.pop()
-        if problem.isGoalState(node[0]):
-            return node[1]
+
+        if problem.isGoalState(node[0]):    # node[0] : state of node
+            return node[1]  # node[1] : string consisting of the path to goal
+        
         if not (node[0] in explored_set):
+
             explored_set.add(node[0])
+
             for child in problem.getSuccessors(node[0]):
+                # when adding a child in frontier the new directions derive from just the 
+                # addition of the directions of the parent node + the single step of the child
                 frontier.push((child[0] , (node[1] + [child[1]])))
+
     return None
  
-    util.raiseNotDefined()
-
 def breadthFirstSearch(problem: SearchProblem) -> List[Directions]:
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
 
+    # exactly the same comments for this application as with the dfs algorithm
+    # the only difference between the two is that frontier is a Queue instead of a Stack
 
     frontier = util.Queue()
     frontier.push( (problem.getStartState() , []) )
-
     explored_set = set()
-    while not frontier.isEmpty():
-        node = frontier.pop()
-        if problem.isGoalState(node[0]):
-            return node[1]
-        if not (node[0] in explored_set):
-            explored_set.add(node[0])
-            for child in problem.getSuccessors(node[0]):
-                frontier.push((child[0] , (node[1] + [child[1]])))
-    return None
 
-    util.raiseNotDefined()
+    while not frontier.isEmpty():
+
+        node = frontier.pop()
+
+        if problem.isGoalState(node[0]):    # node[0] : state of node
+            return node[1]  # node[1] : string consisting of the path to goal
+        
+        if not (node[0] in explored_set):
+
+            explored_set.add(node[0])
+            
+            for child in problem.getSuccessors(node[0]):
+                # when adding a child in frontier the new directions derive from just the 
+                # addition of the directions of the parent node + the single step of the child
+                frontier.push( ( child[0] , ( node[1] + [ child[1] ] ) ) )
+
+    return None
 
 def uniformCostSearch(problem: SearchProblem) -> List[Directions]:
     """Search the node of least total cost first."""
@@ -138,20 +156,29 @@ def uniformCostSearch(problem: SearchProblem) -> List[Directions]:
     frontier.push( ( problem.getStartState() , [])  , 0 )
     explored_set = set()
 
-    while not frontier.isEmpty():
-        node = frontier.pop()
-        if problem.isGoalState( node[0] ):
-            return node[1]
-        if  not (node[0] in explored_set):
-            explored_set.add( node[0]  )
-            for succesor in problem.getSuccessors(node[0]):
-                child = succesor[0]
-                if not ( child in explored_set):
-                    frontier.push( ( child , (node[1] + [succesor[1]]) ), problem.getCostOfActions( (node[1] + [succesor[1]]) ) ) 
-    return None 
+    # tuples now consist of one elements : a tuple containing state and a string of directions 
+    # frontier is now a PQueue and each element is sorted based on the minimum cost required
+    # to get to the node
 
-    
-    util.raiseNotDefined()
+    while not frontier.isEmpty():
+
+        node = frontier.pop()
+
+        if problem.isGoalState( node[0] ):  # node[0] : state of node
+            return node[1] # node[1] : string consisting of the path to goal
+        
+        if  not (node[0] in explored_set):
+
+            explored_set.add( node[0]  )
+
+            for succesor in problem.getSuccessors(node[0]):
+                
+                child = succesor[0] 
+                # child is the new state created by the action on the parent
+
+                frontier.update( ( child , (node[1] + [succesor[1]]) ), problem.getCostOfActions( (node[1] + [succesor[1]]) ) ) 
+                # the cost of a new node is the cost of the parent plus the cost of action 
+    return None 
 
 def nullHeuristic(state, problem=None) -> float:
     """
@@ -166,32 +193,52 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic) -> List[Directi
     frontier.push( ( problem.getStartState() , [] , 0 )  , heuristic(  problem.getStartState() , problem) )
     explored_set = set()
 
+    # elements of frontier consist again of a tuple of 3 elements just like ucs 
+    # we are using again a PQueue for frontier. The nodes in frontier are sorted by 
+    # the sum of the true cost required to get to node plus the heuristic cost
+
+
+
     while not frontier.isEmpty():
+
         node = frontier.pop()
-        if problem.isGoalState( node[0] ):
-            return node[1]
+
+        if problem.isGoalState( node[0] ):  # node[0] : state of node
+            return node[1]  # node[1] : string consisting of the path to goal
+        
         result = visited_check(explored_set , node[0])
+
+        # visited_check searches if the state of the current node has been visited
+        # if it's found it returns the tuple of the node , else it returns False
+
         if result == False:
+
             explored_set.add( (node[0] , node[2]) )
+            # in explored set we store tuples containing the state and the minimum
+            # real cost we have found at the moment
+
             for succesor in problem.getSuccessors(node[0]):
+
                 child = succesor[0]
                 result = visited_check(explored_set , child)
                 g_cost = problem.getCostOfActions( (node[1] + [succesor[1]]) )
                 total_cost = g_cost + heuristic( child, problem)
+
                 if result == False:
+                    # if the new child node has not been visited, calculate the costs and 
+                    # we add it to the frontier
                     g_cost = problem.getCostOfActions( (node[1] + [succesor[1]]) )
                     total_cost = g_cost + heuristic( child, problem)
                     frontier.update( ( child , (node[1] + [succesor[1]]) , g_cost), total_cost )  
                 else:
+                    # if the exact state has already been expanded at some other point 
+                    # but now we have found a path with lower cost we update the frontier
+                    # and remove the node from the visited set
                     if result[1] > g_cost:
-                        frontier.push( ( child , (node[1] + [succesor[1]]) , g_cost), total_cost )  
+                        frontier.update( ( child , (node[1] + [succesor[1]]) , g_cost), total_cost )  
                         explored_set.remove(result)
-
-
-                       
+      
     return None 
-
-    util.raiseNotDefined()
 
 # Abbreviations
 bfs = breadthFirstSearch
